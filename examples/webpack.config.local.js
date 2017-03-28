@@ -22,7 +22,7 @@ const LOCAL_DEVELOPMENT_CONFIG = {
 
   resolve: {
     alias: {
-      // Imports the deck.gl library from the src directory in this repo
+      // Imports the luma.gl library from the src directory in this repo
       'luma.gl': SRC_DIR
     }
   },
