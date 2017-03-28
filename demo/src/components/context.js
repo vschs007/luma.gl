@@ -21,7 +21,7 @@ class Context extends Component {
 
   componentWillUnmount() {
     const Demo = Demos[this.props.demo];
-    if (Demo) Demo.animationFrame.stop();
+    if (Demo) Demo().stop();
   }
 
   _loadDemo(demo, useTransition) {
@@ -29,17 +29,11 @@ class Context extends Component {
 
     if (Demo) {
       // this.props.useParams(Demo.parameters);
-      Demo.init(false);
-      Demo.animationFrame.start();
+      Demo().start();
     }
   }
 
   render() {
-    const {demo, params, owner, data, isInteractive} = this.props;
-    const Demo = Demos[demo];
-
-    if (!Demo) return null;
-
     return (
       <div className="luma-context">
         <canvas id="lumagl-canvas"></canvas>

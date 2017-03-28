@@ -1,58 +1,62 @@
 /* global document */
 import {createGLContext, AnimationFrame, GL, TextureCube, Cube, Matrix4, radians} from 'luma.gl';
 
-const animationFrame = new AnimationFrame()
-const init = (autostart=true, contextName='lumagl-canvas') => {
-  animationFrame
-  .context(() => createGLContext({canvas: contextName}))
-  .init(({gl}) => {
-    gl.clearColor(0, 0, 0, 1);
-    gl.clearDepth(1);
-    gl.enable(GL.DEPTH_TEST);
-    gl.depthFunc(GL.LEQUAL);
-    gl.pixelStorei(GL.UNPACK_FLIP_Y_WEBGL, true);
+let animationFrame;
 
-    renderControls(contextName);
+const initExample = (contextName='lumagl-canvas') => {
+  if (!animationFrame) {
+    animationFrame = new AnimationFrame();
 
-    return {
-      cube: getCube(gl),
-      prism: getPrism(gl),
-      cubemap: new TextureCube(gl, {
-        minFilter: gl.LINEAR_MIPMAP_LINEAR,
-        magFilter: gl.LINEAR,
-        data: genTextures(512),
-        flipY: true,
-        generateMipmap: true
+    animationFrame
+      .context(() => createGLContext({canvas: contextName}))
+      .init(({gl}) => {
+        gl.clearColor(0, 0, 0, 1);
+        gl.clearDepth(1);
+        gl.enable(GL.DEPTH_TEST);
+        gl.depthFunc(GL.LEQUAL);
+        gl.pixelStorei(GL.UNPACK_FLIP_Y_WEBGL, true);
+
+        return {
+          cube: getCube(gl),
+          prism: getPrism(gl),
+          cubemap: new TextureCube(gl, {
+            minFilter: gl.LINEAR_MIPMAP_LINEAR,
+            magFilter: gl.LINEAR,
+            data: genTextures(512),
+            flipY: true,
+            generateMipmap: true
+          })
+        };
       })
-    };
-  })
-  .frame(({gl, tick, aspect, cube, prism, cubemap}) => {
-    gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
+      .frame(({gl, tick, aspect, cube, prism, cubemap}) => {
+        gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
 
-    const view = Matrix4.lookAt({eye: [0, 0, -1]}).translate([0, 0, 4]);
-    const projection = Matrix4.perspective({fov: radians(75), aspect});
+        const view = Matrix4.lookAt({eye: [0, 0, -1]}).translate([0, 0, 4]);
+        const projection = Matrix4.perspective({fov: radians(75), aspect});
 
-    cube.render({
-      uTexture: cubemap,
-      uModel: new Matrix4().scale([5, 5, 5]),
-      uView: view,
-      uProjection: projection
-    });
+        cube.render({
+          uTexture: cubemap,
+          uModel: new Matrix4().scale([5, 5, 5]),
+          uView: view,
+          uProjection: projection
+        });
 
-    const reflection = parseFloat(document.getElementById('reflection').value);
-    const refraction = parseFloat(document.getElementById('refraction').value);
+        const reflection = parseFloat(document.getElementById('reflection').value);
+        const refraction = parseFloat(document.getElementById('refraction').value);
 
-    prism.render({
-      uTexture: cubemap,
-      uModel: new Matrix4().rotateX(tick * 0.01).rotateY(tick * 0.013),
-      uView: view,
-      uProjection: projection,
-      uReflect: reflection,
-      uRefract: refraction
-    });
-  });
+        prism.render({
+          uTexture: cubemap,
+          uModel: new Matrix4().rotateX(tick * 0.01).rotateY(tick * 0.013),
+          uView: view,
+          uProjection: projection,
+          uReflect: reflection,
+          uRefract: refraction
+        });
+      });
+  }
+  renderControls(contextName);
 
-  if (autostart) animationFrame.start();
+  return animationFrame;
 };
 
 function getCube(gl) {
@@ -176,6 +180,8 @@ function drawTexture({ctx, sign, axis, size}) {
 }
 
 function renderControls(canvasId) {
+  if (document.querySelector('#controls')) return;
+
   const canvas = document.querySelector(`#${ canvasId }`);
   const controls = document.createElement('div');
   controls.id = 'controls';
@@ -200,13 +206,9 @@ refraction
   canvas.parentElement.appendChild(controls);
 }
 
-let api = {
-  init,
-  animationFrame
-};
-export default api;
+export default initExample;
 
 /* expose on Window for standalone example */
 if (typeof window !== 'undefined') {
-  window.exampleApp = api;
+  window.initExample = initExample;
 }
