@@ -1,7 +1,7 @@
 /* global document */
-import {createGLContext, AnimationFrame, GL, TextureCube, Cube, Matrix4, radians} from 'luma.gl';
+import {createGLContext, AnimationLoop, GL, TextureCube, Cube, Matrix4, radians} from 'luma.gl';
 
-const animationFrame = new AnimationFrame()
+const animationFrame = new AnimationLoop()
 .context(() => createGLContext({canvas: 'render-canvas'}))
 .init(({gl}) => {
   gl.clearColor(0, 0, 0, 1);

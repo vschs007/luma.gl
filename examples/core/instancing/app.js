@@ -1,9 +1,9 @@
 /* eslint-disable no-var, max-statements */
-import {GL, AnimationFrame, createGLContext, Cube, Matrix4, radians} from 'luma.gl';
+import {GL, AnimationLoop, createGLContext, Cube, Matrix4, radians} from 'luma.gl';
 
 const SIDE = 256;
 
-const animationFrame = new AnimationFrame()
+const animationFrame = new AnimationLoop()
 .context(() => createGLContext({canvas: 'render-canvas'}))
 .init(({gl}) => {
   gl.clearColor(1, 1, 1, 1);
