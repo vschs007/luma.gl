@@ -35,13 +35,15 @@ export function getUniforms({
   lightingPointLights = []
 }) {
   // Set light uniforms. Ambient, directional and point lights.
-  return {
-    lightingEnable,
-    // Ambient
-    lightingAmbientColor,
-    ...getDirectionalUniforms(lightingDirection),
-    ...getPointUniforms(lightingPointLights)
-  };
+  return Object.assign(
+    {
+      lightingEnable,
+      // Ambient
+      lightingAmbientColor
+    },
+    getDirectionalUniforms(lightingDirection),
+    getPointUniforms(lightingPointLights)
+  );
 }
 
 function getDirectionalUniforms({color, direction}) {
