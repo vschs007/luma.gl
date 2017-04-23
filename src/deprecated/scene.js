@@ -1,12 +1,17 @@
 // Scene Object management and rendering
 /* eslint-disable max-statements, no-try-catch */
-import {Vector3} from '../../packages/math';
-import {merge} from '../../utils';
-import Group from './group';
-import {pickModels} from './pick';
+
+import {Vector3} from '../math';
+import {merge} from '../utils';
+import Group from '../core/group';
+import {pickModels} from '../core/pick';
 import assert from 'assert';
 
-const INVALID_ARGUMENT = 'LumaGL.Scene invalid argument';
+const MAX_TEXTURES = 10;
+const MAX_POINT_LIGHTS = 4;
+const PICKING_RES = 4;
+
+const INVALID_ARGUMENT = 'Scene invalid argument';
 
 const DEFAULT_SCENE_OPTS = {
   lights: {
@@ -95,17 +100,17 @@ export default class Scene extends Group {
 
   renderObject({model, uniforms}) {
     // Setup lighting and scene effects like fog, etc.
-    model.render(Object.assign({}, this.getSceneUniforms(), {uniforms}));
+    model.render({...this.getSceneUniforms(), ...uniforms});
     return this;
   }
 
-  pickModels(opts = {}) {
-    const {x, y, uniforms = {}} = opts;
-    return pickModels(this.gl, Object.assign({
+  pickModels({x, y, uniforms = {}, ...opts} = {}) {
+    return pickModels(this.gl, {
       group: this,
       x, y,
-      uniforms
-    }, opts));
+      uniforms: {...uniforms},
+      ...opts
+    });
   }
 
   // Setup the lighting system: ambient, directional, point lights.
@@ -114,13 +119,13 @@ export default class Scene extends Group {
     const {enable, ambient, directional, points} = this.config.lights;
 
     // Set light uniforms. Ambient and directional lights.
-    return Object.assign({},
-      this.getEffectsUniforms(),
-      {enableLights: enable},
-      (enable && ambient ? this.getAmbientUniforms(ambient) : {}),
-      (enable && directional ? this.getDirectionalUniforms(directional) : {}),
-      (enable && points ? this.getPointUniforms(points) : {})
-    );
+    return {
+      ...this.getEffectsUniforms(),
+      enableLights: enable,
+      ...(enable && ambient ? this.getAmbientUniforms(ambient) : {}),
+      ...(enable && directional ? this.getDirectionalUniforms(directional) : {}),
+      ...(enable && points ? this.getPointUniforms(points) : {})
+    };
   }
 
   getAmbientUniforms(ambient) {
@@ -197,6 +202,6 @@ export default class Scene extends Group {
   }
 }
 
-Scene.MAX_TEXTURES = 4;
-Scene.MAX_POINT_LIGHTS = 4;
-Scene.PICKING_RES = 4;
+Scene.MAX_TEXTURES = MAX_TEXTURES;
+Scene.MAX_POINT_LIGHTS = MAX_POINT_LIGHTS;
+Scene.PICKING_RES = PICKING_RES;
